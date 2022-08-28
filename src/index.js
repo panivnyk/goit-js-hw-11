@@ -1,72 +1,109 @@
-import Notiflix from 'notiflix';
 import axios from 'axios';
-import { fetchImages } from './js/fetchImages.js';
+import Notiflix from 'notiflix';
+import SimpleLightbox from 'simplelightbox';
+import 'simplelightbox/dist/simple-lightbox.min.css';
 
-// const DEBOUNCE_DELAY = 300;
-const inputForm = document.querySelector('.input-form');
-const buttonForm = document.querySelector('.button-form');
-const gallery = document.querySelector('.gallery');
+const refs = {
+  form: document.querySelector('.search-form'),
+  buttonForm: document.querySelector('.button-form'),
+  gallery: document.querySelector('.gallery'),
+  loadMore: document.querySelector('.load-more'),
+};
 
+const lightBox = new SimpleLightbox('.gallery a', {
+  captionsData: 'alt',
+  captionDelay: 250,
+});
+const baseURL = 'https://pixabay.com/api/?key=';
+const API_KEY = '29451964-958278d8f10d2abadadf36c5e';
+const searchOption = 'image_type=photo&orientation=horizontal&safesearch=true';
 const DEFAULT_CURRENT_PAGE = 1;
 const HITS_PER_PAGE = 40;
-
-let isLoading = false;
-let items = [];
-let query = '';
 let currentPage = DEFAULT_CURRENT_PAGE;
+let items = [];
+let searchQuery = '';
 let totalPages = 0;
 
-// webformatURL - ссылка на маленькое изображение для списка карточек.
-// largeImageURL - ссылка на большое изображение.
-// tags - строка с описанием изображения. Подойдет для атрибута alt.
-// likes - количество лайков.
-// views - количество просмотров.
-// comments - количество комментариев.
-// downloads - количество загрузок.
+const renderList = items => {
+  //   refs.loadMore.style.display = 'none';
+  const list = items
+    .map(
+      ({
+        webformatURL,
+        largeImageURL,
+        tags,
+        likes,
+        views,
+        comments,
+        downloads,
+      }) =>
+        `<div class="photo-card">
+            <a href="${largeImageURL}">
+            <img src="${webformatURL}" alt="${tags}" loading="lazy" /></a>
+            <div class="info">
+                <p class="info-item">
+                    <b>Likes</b> ${likes}
+                </p>
+                <p class="info-item">
+                    <b>Views</b> ${views}
+                </p>
+                <p class="info-item">
+                    <b>Comments</b> ${comments}
+                </p>
+                <p class="info-item">
+                    <b>Downloads</b> ${downloads}
+                </p>
+            </div>
+        </div>
+        `
+    )
+    .join('');
+  refs.gallery.insertAdjacentHTML('beforeend', list);
+};
 
-/* <div class="photo-card">
-  <img src="" alt="" loading="lazy" />
-  <div class="info">
-    <p class="info-item">
-      <b>Likes</b>
-    </p>
-    <p class="info-item">
-      <b>Views</b>
-    </p>
-    <p class="info-item">
-      <b>Comments</b>
-    </p>
-    <p class="info-item">
-      <b>Downloads</b>
-    </p>
-  </div>
-</div> */
+const fetchData = async (searchQuery, currentPage) => {
+  const { data } = await axios.get(
+    `${baseURL}${API_KEY}&q=${searchQuery}&${searchOption}&per_page=${HITS_PER_PAGE}&page=${currentPage}`
+  );
+  items = await [...items, data.hits];
+  //   totalPages = data.totalHits / HITS_PER_PAGE;
+  renderList(data.hits);
 
-// const searchImages = event => {
-//   const findImages = event.target.value.trim();
-//    event.preventDefault();
+  if (data.totalHits > 0) {
+    Notiflix.Notify.success(`Hooray! We found ${data.totalHits} images.`, {
+      position: 'center-center',
+    });
+  }
+  if (data.hits.length === 0) {
+    Notiflix.Notify.failure(
+      'Sorry, there are no images matching your search query. Please try again.',
+      {
+        position: 'center-center',
+      }
+    );
+    return;
+  }
+  lightBox.refresh();
+};
 
-//   if (query === event.target.elements.query.value) return;
+const handleSubmit = event => {
+  event.preventDefault();
+  if (searchQuery === event.target.elements.searchQuery.value) return;
+  searchQuery = event.target.elements.searchQuery.value;
+  refs.gallery.innerHTML = '';
+  currentPage = DEFAULT_CURRENT_PAGE;
+  items = [];
 
-//   if (searchImages !== '') {
-//       fetchImages(findImages)
-//           .then (images => {
-//               clearResult();
-//               renderCountries(images);
-//           };
-//       })
-//       .catch(error => {
-//         clearResult();
-//         Notiflix.Notify.failure(
-//           'Sorry, there are no images matching your search query. Please try again.',
-//           {
-//             position: 'center-top',
-//           }
-//         );
+  if (!searchQuery) return;
 
-//         return error;
-//       });
-//   }
-// };
+  fetchData(searchQuery, currentPage);
+};
 
-buttonForm.addEventListener('submit', searchImages);
+const loadMoreClick = () => {
+  currentPage += 1;
+  fetchData(searchQuery, currentPage);
+  console.log(currentPage);
+};
+
+refs.form.addEventListener('submit', handleSubmit);
+refs.loadMore.addEventListener('click', loadMoreClick);
