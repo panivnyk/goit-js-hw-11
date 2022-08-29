@@ -7,10 +7,8 @@ const refs = {
   form: document.querySelector('.search-form'),
   buttonForm: document.querySelector('.button-form'),
   gallery: document.querySelector('.gallery'),
-  loadMore: document.querySelector('.load-more'),
+  loadMoreBlock: document.querySelector('.load-more-block'),
 };
-
-refs.loadMore.style.display = 'none';
 
 const lightBox = new SimpleLightbox('.gallery a', {
   captionsData: 'alt',
@@ -88,8 +86,20 @@ const fetchData = async (searchQuery, currentPage) => {
   }
   refs.gallery.insertAdjacentHTML('beforeend', list);
   lightBox.refresh();
-  loadMoreHide(data.hits.length);
+  createBtnLoadMore();
+  document
+    .querySelector('.load-more-present')
+    .addEventListener('click', loadMoreClick);
 };
+
+function createBtnLoadMore() {
+  if (!document.querySelector('.load-more-present')) {
+    const loadMoreBtn = document.createElement('button');
+    loadMoreBtn.classList.add('load-more', 'load-more-present');
+    refs.loadMoreBlock.append(loadMoreBtn);
+    loadMoreBtn.textContent = 'Load more';
+  }
+}
 
 const handleSubmit = event => {
   event.preventDefault();
@@ -110,13 +120,13 @@ const loadMoreClick = () => {
   console.log(currentPage);
 };
 
-function loadMoreHide(hitsValue) {
-  if (hitsValue === 0) {
-    refs.loadMore.style.display = 'none';
-  } else {
-    refs.loadMore.style.display = 'block';
-  }
-}
+// function loadMoreHide(hitsValue) {
+//   if (hitsValue === 0) {
+//     refs.loadMore.style.display = 'none';
+//   } else {
+//     refs.loadMore.style.display = 'block';
+//   }
+// }
 
 refs.form.addEventListener('submit', handleSubmit);
-refs.loadMore.addEventListener('click', loadMoreClick);
+// refs.loadMore.addEventListener('click', loadMoreClick);
