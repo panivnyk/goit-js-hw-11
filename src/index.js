@@ -7,8 +7,10 @@ const refs = {
   form: document.querySelector('.search-form'),
   buttonForm: document.querySelector('.button-form'),
   gallery: document.querySelector('.gallery'),
-  loadMoreBlock: document.querySelector('.load-more-block'),
+  loadMore: document.querySelector('.load-more'),
 };
+
+refs.loadMore.style.display = 'none';
 
 const lightBox = new SimpleLightbox('.gallery a', {
   captionsData: 'alt',
@@ -25,7 +27,6 @@ let searchQuery = '';
 let totalPages = 0;
 
 const renderList = items => {
-  //   refs.loadMore.style.display = 'none';
   return (list = items
     .map(
       ({
@@ -85,21 +86,22 @@ const fetchData = async (searchQuery, currentPage) => {
     return;
   }
   refs.gallery.insertAdjacentHTML('beforeend', list);
+  toggleLoadMoreBtn(data.totalHits);
   lightBox.refresh();
-  createBtnLoadMore();
-  document
-    .querySelector('.load-more-present')
-    .addEventListener('click', loadMoreClick);
+  // createBtnLoadMore();
+  // document
+  //   .querySelector('.load-more-present')
+  //   .addEventListener('click', loadMoreClick);
 };
 
-function createBtnLoadMore() {
-  if (!document.querySelector('.load-more-present')) {
-    const loadMoreBtn = document.createElement('button');
-    loadMoreBtn.classList.add('load-more', 'load-more-present');
-    refs.loadMoreBlock.append(loadMoreBtn);
-    loadMoreBtn.textContent = 'Load more';
-  }
-}
+// function createBtnLoadMore() {
+//   if (!document.querySelector('.load-more-present')) {
+//     const loadMoreBtn = document.createElement('button');
+//     loadMoreBtn.classList.add('load-more', 'load-more-present');
+//     refs.loadMoreBlock.append(loadMoreBtn);
+//     loadMoreBtn.textContent = 'Load more';
+//   }
+// }
 
 const handleSubmit = event => {
   event.preventDefault();
@@ -129,4 +131,12 @@ const loadMoreClick = () => {
 // }
 
 refs.form.addEventListener('submit', handleSubmit);
-// refs.loadMore.addEventListener('click', loadMoreClick);
+refs.loadMore.addEventListener('click', loadMoreClick);
+
+function toggleLoadMoreBtn(hitsValue) {
+  if (hitsValue === 0 || hitsValue < 0) {
+    refs.loadMore.style.display = 'none';
+  } else {
+    refs.loadMore.style.display = 'block';
+  }
+}
