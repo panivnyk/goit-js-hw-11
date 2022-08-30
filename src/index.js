@@ -1,35 +1,86 @@
-import axios from 'axios';
 import Notiflix from 'notiflix';
 import SimpleLightbox from 'simplelightbox';
 import 'simplelightbox/dist/simple-lightbox.min.css';
+import { fetchImages } from './js/fetchImages.js';
 
 const refs = {
-  form: document.querySelector('.search-form'),
+  searchForm: document.querySelector('.search-form'),
   buttonForm: document.querySelector('.button-form'),
   gallery: document.querySelector('.gallery'),
   loadMore: document.querySelector('.load-more'),
 };
 
-refs.loadMore.style.display = 'none';
+const { searchQuery } = refs.searchForm;
 
 const lightBox = new SimpleLightbox('.gallery a', {
   captionsData: 'alt',
   captionDelay: 250,
 });
-const baseURL = 'https://pixabay.com/api/?key=';
-const API_KEY = '29451964-958278d8f10d2abadadf36c5e';
-const searchOption = 'image_type=photo&orientation=horizontal&safesearch=true';
-const DEFAULT_CURRENT_PAGE = 1;
+
 const HITS_PER_PAGE = 40;
-let currentPage = DEFAULT_CURRENT_PAGE;
 let items = [];
-let searchQuery = '';
+let query = '';
+let currentPage = 1;
 let totalPages = 0;
 
-const renderList = items => {
-  return (list = items
-    .map(
-      ({
+async function fetchData() {
+  const data = await fetchImages(query, HITS_PER_PAGE, currentPage);
+
+  items = await [...items, data.hits];
+  totalPages = await data.totalHits;
+
+  renderList(data.hits);
+
+  if (currentPage > Number(totalPages / HITS_PER_PAGE)) {
+    Notiflix.Notify.failure(
+      "We're sorry, but you've reached the end of search results.",
+      {
+        position: 'center-center',
+      }
+    );
+  }
+
+  if (data.hits.length === 0) {
+    return Notiflix.Notify.failure(
+      'Sorry, there are no images matching your search query. Please try again.',
+      {
+        position: 'center-center',
+      }
+    );
+  }
+
+  currentPage === 1
+    ? Notiflix.Notify.success(`Hooray! We found  ${data.total} images`, {
+        position: 'center-center',
+      })
+    : '';
+}
+
+const handleSubmit = async event => {
+  event.preventDefault();
+  if (query === searchQuery.value) return;
+
+  query = await searchQuery.value;
+  refs.gallery.innerHTML = '';
+  currentPage = 1;
+  items = [];
+  if (!query) return;
+
+  fetchData();
+  refs.loadMore.classList.remove('hidden');
+};
+
+refs.searchForm.addEventListener('submit', handleSubmit);
+
+function renderList(itemsData) {
+  refs.gallery.insertAdjacentHTML('beforeend', createMarkup(itemsData));
+  lightBox.refresh();
+}
+
+function createMarkup(items) {
+  return items
+    .map(item => {
+      const {
         webformatURL,
         largeImageURL,
         tags,
@@ -37,8 +88,9 @@ const renderList = items => {
         views,
         comments,
         downloads,
-      }) =>
-        `<div class="photo-card">
+      } = item;
+      return `
+      <div class="photo-card">
             <a href="${largeImageURL}">
             <img src="${webformatURL}" alt="${tags}" loading="lazy" /></a>
             <div class="info">
@@ -56,87 +108,17 @@ const renderList = items => {
                 </p>
             </div>
         </div>
-        `
-    )
-    .join(''));
-  // refs.gallery.insertAdjacentHTML('beforeend', list);
-  // loadMoreHide(data.hits.length);
-};
+      `;
+    })
+    .join(' ');
+}
 
-const fetchData = async (searchQuery, currentPage) => {
-  const { data } = await axios.get(
-    `${baseURL}${API_KEY}&q=${searchQuery}&${searchOption}&per_page=${HITS_PER_PAGE}&page=${currentPage}`
-  );
-  items = await [...items, data.hits];
-  //   totalPages = data.totalHits / HITS_PER_PAGE;
-  renderList(data.hits);
-
-  if (data.totalHits > 0) {
-    Notiflix.Notify.success(`Hooray! We found ${data.totalHits} images.`, {
-      position: 'center-center',
-    });
-  }
-  if (data.hits.length === 0) {
-    Notiflix.Notify.failure(
-      'Sorry, there are no images matching your search query. Please try again.',
-      {
-        position: 'center-center',
-      }
-    );
-    return;
-  }
-  refs.gallery.insertAdjacentHTML('beforeend', list);
-  toggleLoadMoreBtn(data.totalHits);
-  lightBox.refresh();
-  // createBtnLoadMore();
-  // document
-  //   .querySelector('.load-more-present')
-  //   .addEventListener('click', loadMoreClick);
-};
-
-// function createBtnLoadMore() {
-//   if (!document.querySelector('.load-more-present')) {
-//     const loadMoreBtn = document.createElement('button');
-//     loadMoreBtn.classList.add('load-more', 'load-more-present');
-//     refs.loadMoreBlock.append(loadMoreBtn);
-//     loadMoreBtn.textContent = 'Load more';
-//   }
-// }
-
-const handleSubmit = event => {
-  event.preventDefault();
-  if (searchQuery === event.target.elements.searchQuery.value) return;
-  searchQuery = event.target.elements.searchQuery.value;
-  refs.gallery.innerHTML = '';
-  currentPage = DEFAULT_CURRENT_PAGE;
-  items = [];
-
-  if (!searchQuery) return;
-
-  fetchData(searchQuery, currentPage);
-};
-
-const loadMoreClick = () => {
-  currentPage += 1;
-  fetchData(searchQuery, currentPage);
-  console.log(currentPage);
-};
-
-// function loadMoreHide(hitsValue) {
-//   if (hitsValue === 0) {
-//     refs.loadMore.style.display = 'none';
-//   } else {
-//     refs.loadMore.style.display = 'block';
-//   }
-// }
-
-refs.form.addEventListener('submit', handleSubmit);
+// --- Load more click ---
 refs.loadMore.addEventListener('click', loadMoreClick);
 
-function toggleLoadMoreBtn(hitsValue) {
-  if (hitsValue === 0 || hitsValue < 0) {
-    refs.loadMore.style.display = 'none';
-  } else {
-    refs.loadMore.style.display = 'block';
-  }
+function loadMoreClick() {
+  currentPage += 1;
+  fetchData();
+
+  refs.loadMore.classList.add('hidden');
 }

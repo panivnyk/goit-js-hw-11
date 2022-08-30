@@ -8,21 +8,12 @@ img {
   background-color: rgba(81, 90, 189, 0.8);
   text-align: center;
 }
-.gallery {
-  position: absolute;
-  margin-top: 30px;
-  display: flex;
-  flex-wrap: wrap;
-  // flex-direction: column;
-  flex: 1;
-  justify-content: center;
-  overflow: auto;
-}
 
 .visible {
   display: block;
 }
 
+//  --- Search form ---
 .search-form {
   padding-top: 15px;
   padding-bottom: 15px;
@@ -58,6 +49,7 @@ img {
   }
 }
 
+// --- gallery card's ---
 .photo-card {
   overflow: auto;
   margin-right: 30px;
@@ -90,7 +82,23 @@ img {
   text-align: center;
 }
 
+// --- Gallery ---
+.gallery {
+  position: absolute;
+  margin-top: 30px;
+  display: flex;
+  flex-wrap: wrap;
+  // flex-direction: column;
+  flex: 1;
+  justify-content: center;
+  overflow: auto;
+}
+
 .load-more {
   display: block;
   margin: 5 auto;
+  cursor: pointer;
+  &.hidden {
+    display: none;
+  }
 }
