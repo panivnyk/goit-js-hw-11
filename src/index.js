@@ -25,10 +25,8 @@ let totalPages = 0;
 
 async function fetchData() {
   const data = await fetchImages(query, HITS_PER_PAGE, currentPage);
-
   items = await [...items, data.hits];
   totalPages = await data.totalHits;
-
   renderList(data.hits);
 
   if (currentPage > Number(totalPages / HITS_PER_PAGE)) {
@@ -49,11 +47,16 @@ async function fetchData() {
     );
   }
 
-  currentPage === 1
-    ? Notiflix.Notify.success(`Hooray! We found  ${data.total} images`, {
-        position: 'center-center',
-      })
-    : '';
+  //   currentPage === 1
+  //     ? Notiflix.Notify.success(`Hooray! We found  ${data.total} images`, {
+  //         position: 'center-center',
+  //       })
+  //     : '';
+  if (currentPage === 1) {
+    return Notiflix.Notify.success(`Hooray! We found  ${data.total} images`, {
+      position: 'center-center',
+    });
+  }
 }
 
 const handleSubmit = async event => {
