@@ -30,7 +30,7 @@ async function fetchData() {
   totalPages = await data.totalHits;
   renderList(data.hits);
 
-  if (currentPage === 1) {
+  if (currentPage === 1 && data.total > 0) {
     return Notiflix.Notify.success(`Hooray! We found  ${data.total} images`, {
       position: 'center-center',
     });
@@ -46,7 +46,6 @@ async function fetchData() {
     refs.loadMore.classList.add('hidden');
     return;
   }
-
   if (data.hits.length === 0) {
     return Notiflix.Notify.failure(
       'Sorry, there are no images matching your search query. Please try again.',
