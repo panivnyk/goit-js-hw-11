@@ -84,11 +84,9 @@ img {
 
 // --- Gallery ---
 .gallery {
-  position: absolute;
   margin-top: 30px;
   display: flex;
   flex-wrap: wrap;
-  // flex-direction: column;
   flex: 1;
   justify-content: center;
   overflow: auto;

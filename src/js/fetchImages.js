@@ -7,7 +7,6 @@ const searchOption = 'image_type=photo&orientation=horizontal&safesearch=true';
 
 export async function fetchImages(searchQuery, HITS_PER_PAGE, currentPage) {
   try {
-    // const { data } = await axios.get(
     const res = await axios.get(
       `${baseURL}${API_KEY}&q=${searchQuery}&${searchOption}&per_page=${HITS_PER_PAGE}&page=${currentPage}`
     );
@@ -19,4 +18,3 @@ export async function fetchImages(searchQuery, HITS_PER_PAGE, currentPage) {
     });
   }
 }
-// export default { fetchImages };

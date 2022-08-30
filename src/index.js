@@ -23,6 +23,7 @@ let query = '';
 let currentPage = 1;
 let totalPages = 0;
 
+// ---  Fetching data from array of images---
 async function fetchData() {
   const data = await fetchImages(query, HITS_PER_PAGE, currentPage);
   items = await [...items, data.hits];
