@@ -47,11 +47,6 @@ async function fetchData() {
     );
   }
 
-  //   currentPage === 1
-  //     ? Notiflix.Notify.success(`Hooray! We found  ${data.total} images`, {
-  //         position: 'center-center',
-  //       })
-  //     : '';
   if (currentPage === 1) {
     return Notiflix.Notify.success(`Hooray! We found  ${data.total} images`, {
       position: 'center-center',
