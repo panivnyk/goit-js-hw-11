@@ -30,6 +30,12 @@ async function fetchData() {
   totalPages = await data.totalHits;
   renderList(data.hits);
 
+  if (currentPage === 1) {
+    return Notiflix.Notify.success(`Hooray! We found  ${data.total} images`, {
+      position: 'center-center',
+    });
+  }
+
   if (currentPage > Number(totalPages / HITS_PER_PAGE)) {
     Notiflix.Notify.failure(
       "We're sorry, but you've reached the end of search results.",
@@ -38,6 +44,7 @@ async function fetchData() {
       }
     );
     refs.loadMore.classList.add('hidden');
+    return;
   }
 
   if (data.hits.length === 0) {
@@ -47,12 +54,6 @@ async function fetchData() {
         position: 'center-center',
       }
     );
-  }
-
-  if (currentPage === 1) {
-    return Notiflix.Notify.success(`Hooray! We found  ${data.total} images`, {
-      position: 'center-center',
-    });
   }
 }
 
