@@ -36,6 +36,7 @@ async function fetchData() {
         position: 'center-center',
       }
     );
+    refs.loadMore.classList.add('hidden');
   }
 
   if (data.hits.length === 0) {
@@ -65,7 +66,6 @@ const handleSubmit = async event => {
   if (!query) return;
 
   fetchData();
-  refs.loadMore.classList.remove('hidden');
 };
 
 refs.searchForm.addEventListener('submit', handleSubmit);
@@ -73,6 +73,7 @@ refs.searchForm.addEventListener('submit', handleSubmit);
 function renderList(itemsData) {
   refs.gallery.insertAdjacentHTML('beforeend', createMarkup(itemsData));
   lightBox.refresh();
+  refs.loadMore.classList.remove('hidden');
 }
 
 function createMarkup(items) {
