@@ -36,6 +36,17 @@ async function fetchData() {
     });
   }
 
+  if (data.hits.length === 0) {
+    Notiflix.Notify.failure(
+      'Sorry, there are no images matching your search query. Please try again.',
+      {
+        position: 'center-center',
+      }
+    );
+    refs.loadMore.classList.add('hidden');
+    return;
+  }
+
   if (currentPage > Number(totalPages / HITS_PER_PAGE)) {
     Notiflix.Notify.failure(
       "We're sorry, but you've reached the end of search results.",
@@ -45,14 +56,6 @@ async function fetchData() {
     );
     refs.loadMore.classList.add('hidden');
     return;
-  }
-  if (data.hits.length === 0) {
-    return Notiflix.Notify.failure(
-      'Sorry, there are no images matching your search query. Please try again.',
-      {
-        position: 'center-center',
-      }
-    );
   }
 }
 
